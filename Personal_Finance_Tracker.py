@@ -1,27 +1,33 @@
-expenses = []
-
-def add_expense():
+def create_expense(item: str, price: float, category: str) -> dict:
+    return{
+    "item": item,
+    "price": price,
+    "category": category
+}
+def add_expense(expences:list) -> None:
     while True:
-        item = input("Enter the product name\n")
+        item = input("Enter the product name (or type 'end' to finish): ").strip()
         if item.lower() == "end":
             break
-        try:
-            price = float(input(f"Enter the price for the item {item}\n"))
-        except ValueError:
-            input("This is not a valid price! I'm setting it to 0.0")
-            price = 0.0
-        category = input(f"Enter a category for the item {item}\n")
-        entry = {
-            "item": item,
-            "price": price,
-            "category": category
-        }
-        expenses.append(entry)
-        print(f"Added {item} to the list\n")
-
-    return expenses
-
-add_expense()
-print("Your list:", expenses)
-
+        if not item:
+            print("Item name cannot be empty.")
+            continue
+        while True:
+            try:
+                raw_input = (input(f"Enter the price for {item}\n")).strip().replace(",", ".")
+                price = float(raw_input)
+                if price < 0:
+                    print("Price cannot be negative.")
+                    continue
+                break
+            except ValueError:
+                print("Invalid price. Try again.")
+            category = input(f"Enter a category for {item}: ").strip()
+            if not category:
+                print("uncategorized")
+            
+            expence = create_expense(item, price, category)
+            expences.append(expence)
+            
+            print(f"Added {item}.\n")
 
