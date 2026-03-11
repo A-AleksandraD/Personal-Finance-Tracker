@@ -1,0 +1,32 @@
+[
+    {
+        "item": "Ciastka",
+        "price": 8.0,
+        "category": "Jedzenie"
+    },
+    {
+        "item": "Mleko",
+        "price": 4.5,
+        "category": "Jedzenie"
+    },
+    {
+        "item": "Czynsz",
+        "price": 550.0,
+        "category": "Oplaty stale"
+    },
+    {
+        "item": "Studia",
+        "price": 500.0,
+        "category": "Nauka"
+    },
+    {
+        "item": "Glovo",
+        "price": 250.0,
+        "category": "Jedzenie"
+    },
+    {
+        "item": "Wynajem",
+        "price": 1800.0,
+        "category": "Oplaty stale"
+    }
+]

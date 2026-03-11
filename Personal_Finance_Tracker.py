@@ -39,7 +39,7 @@ def create_expense(item: str, price: float, category: str) -> Expense:
             "item": item,
             "price": price,
             "category": category
- }
+    }
     
 def get_valid_price(item: str) -> float:
     """Prompt the user until a valid non-negative price is entered."""
@@ -90,11 +90,73 @@ def show_expenses(expenses:list) -> None:
         return
     print()
     for idx, expense in enumerate(expenses, start=1):
-        print(f"{idx}. {expense['item']}: ${expense['price']} ({expense['category']})")
+        print(f"{idx}. {expense['item']}: ${expense['price']:.2f} ({expense['category']})")
         
 def calculate_total(expenses:list[Expense]) -> float:
     """Return the sum of all expense prices."""
     return sum(expense["price"] for expense in expenses)
+
+def delete_expense(expenses: list[Expense]) -> None:
+    """Delete an expense chosen by the user."""
+    if not expenses:
+        print("No expenses to delete.")
+        return
+    show_expenses(expenses)
+    while True:
+        choice = input("Enter the number of the expense to delete (or 'cancel' to go back): ").strip()
+        if choice.lower() == "cancel":
+            return
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(expenses):
+                removed = expenses.pop(idx)
+                save_expenses(expenses)
+                print(f"✔ Deleted '{removed['item']}' (${removed['price']:.2f}).")
+                return
+            else:
+                print("Invalid number. Please choose a valid expense.")
+        except ValueError:
+            print("Please enter a valid number or 'cancel'.")
+
+
+def edit_expense(expenses: list[Expense]) -> None:
+    """Interactively edit an existing expense chosen by the user."""
+    if not expenses:
+        print("No expenses to edit.")
+        return
+    show_expenses(expenses)
+    while True:
+        choice = input("Enter the number of the expense to edit (or 'cancel' to go back): ").strip()
+        if choice.lower() == "cancel":
+            return
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(expenses):
+                expense = expenses[idx]
+                print(f"Editing '{expense['item']}' (${expense['price']:.2f}, {expense['category']})")
+                new_item = input("Enter new product name (or press Enter to keep current): ").strip()
+                if new_item:
+                    expense['item'] = new_item
+                new_price_input = input("Enter new price (or press Enter to keep current): ").strip().replace(",", ".")
+                if new_price_input:
+                    try:
+                        new_price = float(new_price_input)
+                        if new_price < 0:
+                            print("Price cannot be negative. Keeping current price.")
+                        else:
+                            expense['price'] = new_price
+                    except ValueError:
+                        print("Invalid price. Keeping current price.")
+                new_category = input("Enter new category (or press Enter to keep current): ").strip()
+                if new_category:
+                    expense['category'] = new_category
+                save_expenses(expenses)
+                print(f"✔ Updated '{expense['item']}' (${expense['price']:.2f}, {expense['category']}).")
+                return
+            else:
+                print("Invalid number. Please choose a valid expense.")
+        except ValueError:
+            print("Please enter a valid number or 'cancel'.")
 
 # --- UI ---
 def print_menu() -> None:
@@ -103,7 +165,9 @@ def print_menu() -> None:
     print("  1. Add Expense")
     print("  2. Show Expenses")
     print("  3. Show Total")
-    print("  4. Exit")
+    print("  4. Delete Expense")
+    print("  5. Edit Expense")
+    print("  6. Exit")
 
 
 def handle_choice(choice: str, expenses: list[Expense]) -> bool:
@@ -117,13 +181,17 @@ def handle_choice(choice: str, expenses: list[Expense]) -> bool:
         show_expenses(expenses)
     elif choice == "3":
         total = calculate_total(expenses)
-        print(f"\n  Total Expenses: ${total:.2f}")
+        print(f"\n  Total Expenses: ${total:.2f}")   
     elif choice == "4":
+        delete_expense(expenses)
+    elif choice == "5":
+        edit_expense(expenses)
+    elif choice == "6":
         save_expenses(expenses)
         print("Goodbye!")
         return False
     else:
-        print("Invalid option. Please choose 1–4.")
+        print("Invalid option. Please choose 1–6.")
 
     return True
 
