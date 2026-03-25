@@ -28,5 +28,10 @@
         "item": "Wynajem",
         "price": 1800.0,
         "category": "Oplaty stale"
+    },
+    {
+        "item": "Warzywa",
+        "price": 25.0,
+        "category": "Jedzenie"
     }
 ]
