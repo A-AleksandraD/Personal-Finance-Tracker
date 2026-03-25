@@ -1,6 +1,6 @@
 from models import Expense
 from storage import save_expenses
-from logic import create_expense, calculate_total
+from logic import create_expense, calculate_total, summarize_by_category, filter_by_category, sort_expenses
 
 def get_valid_price(item: str) -> float:
     while True:
@@ -60,12 +60,69 @@ def delete_expense(expenses: list[Expense]) -> None:
         print("Invalid input.")
 
 def edit_expense(expenses: list[Expense]) -> None:
-    # Tutaj wklej swoją całą funkcję edit_expense (pamiętaj o save_expenses na końcu)
-    pass 
+    if not expenses:
+        print("No expenses to edit.")
+        return
+    show_expenses(expenses)
+    choice = input("Enter the number to edit (or 'cancel'): ").strip()
+    if choice.lower() == "cancel":
+        return
+    try:
+        idx = int(choice) - 1
+        if not (0 <= idx < len(expenses)):
+            print("Invalid number.")
+            return
+        exp = expenses[idx]
+
+        item = input(f"New name (Enter to keep '{exp['item']}'): ").strip() or exp["item"]
+
+        if input(f"Change price? Current: ${exp['price']:.2f} (y/n): ").strip().lower() == "y":
+            price = get_valid_price(item)
+        else:
+            price = exp["price"]
+
+        if input(f"Change category? Current: '{exp['category']}' (y/n): ").strip().lower() == "y":
+            category = get_category(item)
+        else:
+            category = exp["category"]
+
+        expenses[idx] = create_expense(item, price, category)
+        save_expenses(expenses)
+        print(f"✔ Updated '{item}' (${price:.2f}, {category}).")
+    except ValueError:
+        print("Invalid input.")
+        
+def show_summary(expenses: list[Expense]) -> None:
+    if not expenses:
+        print("No expenses to summarize.")
+        return
+    summary = summarize_by_category(expenses)
+    total = calculate_total(expenses)
+    print("\n── Summary by Category ──")
+    for category, amount in summary.items():
+        bar = "█" * int((amount / total) * 20)
+        print(f"  {category:<20} ${amount:>7.2f}  {bar}")
+    print(f"  {'TOTAL':<20} ${total:>7.2f}")
+
+def show_filtered(expenses: list[Expense]) -> None:
+    print("\n  Sort by: 1. Price  2. Name  3. Category")
+    sort_choice = input("  Choose (or Enter to skip): ").strip()
+    sort_map = {"1": "price", "2": "item", "3": "category"}
+
+    category = input("  Filter by category (or Enter to skip): ").strip().lower()
+    result = filter_by_category(expenses, category) if category else expenses[:]
+
+    if sort_choice in sort_map:
+        result = sort_expenses(result, by=sort_map[sort_choice])
+
+    if not result:
+        print("  No expenses match your filter.")
+    else:
+        show_expenses(result)
 
 def print_menu() -> None:
     print("\n── Personal Finance Tracker ──")
-    print("  1. Add Expense | 2. Show | 3. Total | 4. Delete | 5. Edit | 6. Exit")
+    print("  1. Add | 2. Show | 3. Total | 4. Delete | 5. Edit | 6. Filter & Sort | 7. Summary | 8. Exit")
 
 def handle_choice(choice: str, expenses: list[Expense]) -> bool:
     if choice == "1": add_expense(expenses)
@@ -74,7 +131,9 @@ def handle_choice(choice: str, expenses: list[Expense]) -> bool:
         print(f"\n  Total Expenses: ${calculate_total(expenses):.2f}")
     elif choice == "4": delete_expense(expenses)
     elif choice == "5": edit_expense(expenses)
-    elif choice == "6":
+    elif choice == "6": show_filtered(expenses)
+    elif choice == "7": show_summary(expenses)
+    elif choice == "8":
         print("Goodbye!")
         return False
     else:
